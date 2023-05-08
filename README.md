@@ -12,17 +12,16 @@ program            = { statement } ;
 statement          = product_def | product_rm | stock_op | var_assignment | print | if_statement | loop_chain | function_def | (function_call, ";") ;
 
 product_def        = "product", identifier, "{", product_properties, "}" ;
-product_properties = "name", ":", string, ";", [ "description", ":", string, ";" ], [ "category", ":", string, ";" ], [ "price", ":", expression, ";" ], [ "quantity", ":", expression, ";" ] ;
-property_name      = "name" | "description" | "category" | "price" | "quantity" ;
-property_value     = string | expression ;
+product_properties = "name", ":", string, ";", "description", ":", string, ";", "category", ":", string, ";", "price", ":", expression, ";", "quantity", ":", expression, ";";
 
-product_rm         = "remove", identifier, ";" ;
+product_rm         = "rm", identifier, ";" ;
 
-stock_op           = ("in" | "out"), identifier, number, ";" ;
+stock_op           = ("in" | "out"), identifier, expression, ";" ;
 
 var_assignment     = identifier, [ ".", property_name ], expression ;
+property_name      = "name" | "description" | "category" | "price" | "quantity" ;
 
-print               = "print", (string | expression), ";" ;
+print              = "print", (string | expression), ";" ;
 
 if_statement       = "if", comparison, "do", program, [ "else", program ], "end", ";" ;
 loop_chain         = "while", comparison, "do", program, "end", ";" ;
