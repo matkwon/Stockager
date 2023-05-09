@@ -5,11 +5,11 @@
 class CodeGenContext;
 class NStatement;
 class NExpression;
-class NVariableDeclaration;
+class NVarAssignment;
 
 typedef std::vector<NStatement*> StatementList;
 typedef std::vector<NExpression*> ExpressionList;
-typedef std::vector<NVariableDeclaration*> VariableList;
+typedef std::vector<NVarAssignment*> VariableList;
 
 class Node {
 public:
@@ -103,27 +103,30 @@ public:
 	virtual llvm::Value* codeGen(CodeGenContext& context);
 };
 
-class NVariableDeclaration : public NStatement {
+class NVarAssignment : public NStatement {
 public:
 	const NIdentifier& type;
 	NIdentifier& id;
 	NExpression *assignmentExpr;
-	NVariableDeclaration(const NIdentifier& type, NIdentifier& id) :
+	NVarAssignment(const NIdentifier& type, NIdentifier& id) :
 		type(type), id(id) { assignmentExpr = NULL; }
-	NVariableDeclaration(const NIdentifier& type, NIdentifier& id, NExpression *assignmentExpr) :
+	NVarAssignment(const NIdentifier& type, NIdentifier& id, NExpression *assignmentExpr) :
 		type(type), id(id), assignmentExpr(assignmentExpr) { }
 	virtual llvm::Value* codeGen(CodeGenContext& context);
 };
 
-class NExternDeclaration : public NStatement {
+class NProductDeclaration : public NStatement {
 public:
-    const NIdentifier& type;
-    const NIdentifier& id;
-    VariableList arguments;
-    NExternDeclaration(const NIdentifier& type, const NIdentifier& id,
-            const VariableList& arguments) :
-        type(type), id(id), arguments(arguments) {}
-    virtual llvm::Value* codeGen(CodeGenContext& context);
+	NIdentifier& id;
+	NString& name;
+	NString& description;
+	NString& category;
+	NDouble& price;
+	NDouble& quantity;
+	NProductDeclaration(NIdentifier& id, NString& name, NString& description,
+			NString& category, NDouble& price, NDouble& quantity) :
+		id(id), name(name), description(description), category(category), price(price), quantity(quantity) { }
+	virtual llvm::Value* codeGen(CodeGenContext& context);
 };
 
 class NFunctionDeclaration : public NStatement {

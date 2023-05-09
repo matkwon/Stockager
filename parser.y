@@ -14,9 +14,7 @@
 	NBlock *block;
 	NExpression *expr;
 	NStatement *stmt;
-	NIdentifier *ident;
-	NVariableDeclaration *var_assignment;
-	std::vector<NVariableDeclaration*> *varvec;
+	std::vector<NVarAssignment*> *varvec;
 	std::vector<NExpression*> *exprvec;
 	std::string *string;
 	int token;
@@ -39,13 +37,13 @@
    we call an ident (defined by union type ident) we are really
    calling an (NIdentifier*). It makes the compiler happy.
  */
-%type <ident> ident
-%type <expr> numeric expr 
+%type <string> string
+%type <expr> numeric ident expr stock_delta comparison term factor
 %type <varvec> func_decl_args
 %type <exprvec> call_args
 %type <block> program stmts block
-%type <stmt> stmt var_assignment func_decl extern_decl
-%type <token> comparison
+%type <stmt> stmt product_def product_rm stock_op var_assignment print if while func_decl function_call
+%type <token> property_name
 
 /* Operator precedence for mathematical operators */
 %left TPLUS TMINUS
@@ -62,14 +60,14 @@ stmts : stmt { $$ = new NBlock(); $$->statements.push_back($<stmt>1); }
 	  | stmts stmt { $1->statements.push_back($<stmt>2); }
 	  ;
 
-stmt : product_def { $$ = new NProdDefStatement(*$2); }
-	 | product_rm { $$ = new NProdRmStatement(*$2); }
+stmt : product_def { $$ = new NProductDeclaration(*$2); }
+	 | product_rm { $$ = new NProductRm(*$2); }
 	 | stock_op { $$ = new NStockOpStatement(*$2); }
-	 | var_assignment { $$ = new NVarAssignStatement(*$2); }
-	 | print { $$ = new NPrintStatement(*$2); }
-	 | if_statement { $$ = new NIfStatement(*$2); }
-	 | loop_chain { $$ = new NLoopStatement(*$2); }
-	 | function_def { $$ = new NFuncDefStatement(*$2); }
+	 | var_assignment { $$ = new NVarAssignment(*$2); }
+	 | print { $$ = new NPrint(*$2); }
+	 | if { $$ = new NIf(*$2); }
+	 | while { $$ = new NLoopStatement(*$2); }
+	 | func_decl { $$ = new NFunctionDeclaration(*$2); }
 	 | function_call { $$ = new NFuncCallStatement(*$2); }
 	 | TRETURN expr { $$ = new NReturnStatement(*$2); }
      ;
