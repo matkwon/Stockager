@@ -87,3 +87,9 @@ function peripherals_combo_promotion():
 
 peripherals_combo_promotion()
 ```
+
+## Testing
+Test with:
+```sh
+python main.py test.st
+```
