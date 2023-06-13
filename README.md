@@ -9,36 +9,38 @@ Stockager is a stock management DSL (Domain-Specific Language), developed for th
 
 ```
 program            = { statement } ;
-statement          = product_def | product_rm | stock_op | var_assignment | print | if_statement | loop_chain | function_def | (function_call, ";") ;
+statement          = product_def | product_rm | stock_op | var_assignment | print | if_statement | loop_chain | function_def | function_call | return ;
 
 product_def        = "product", identifier, "{", product_properties, "}" ;
-product_properties = "name", ":", string, ";", "description", ":", string, ";", "category", ":", string, ";", "price", ":", expression, ";", "quantity", ":", expression, ";";
+product_properties = "name", ":", string, ";", "description", ":", string, ";", "category", ":", string, ";", "price", ":", rel_expression, ";", "quantity", ":", rel_expression, ";";
 
 product_rm         = "rm", identifier, ";" ;
 
-stock_op           = ("in" | "out"), identifier, expression, ";" ;
+stock_op           = ("in" | "out"), identifier, rel_expression, ";" ;
 
-var_assignment     = identifier, [ ".", property_name ], expression ;
+var_assignment     = identifier, [ ".", property_name ], "=", rel_expression ;
 property_name      = "name" | "description" | "category" | "price" | "quantity" ;
 
-print              = "print", (string | expression), ";" ;
+print              = "print", rel_expression, ";" ;
 
-if_statement       = "if", comparison, "do", program, [ "else", program ], "end", ";" ;
-loop_chain         = "while", comparison, "do", program, "end", ";" ;
-comparison         = expression, ( "==" | "!=" | ">" | ">=" | "<" | "<=" ), expression .
+if_statement       = "if", rel_expression, ":", program, [ "else", ":", program ], "end", ";" ;
+loop_chain         = "while", rel_expression, ":", program, "end", ";" ;
 
-function_def       = "function", identifier, "(", [ param_list ], ")", program, ("return", expression | "end"), ";" ;
+function_def       = "function", identifier, "(", [ param_list ], ")", ":", program, "end", ";" ;
 param_list         = identifier, { "," identifier } ;
 
-expression         = term, { ("+" | "-"), term } ;
-term               = factor, { ("*" | "/"), factor } ;
-factor             = (("+" | "-"), factor) | number | "(", expression, ")" | identifier, [ ".", property_name ] | function_call ;
+rel_expression     = expression, { (">" | "<" | "==" | "!=" | ">=" | "<="), expression } ;
+expression         = term, { ("+" | "-" | "or"), term } ;
+term               = factor, { ("*" | "/" | "and"), factor } ;
+factor             = (("+" | "-" | "not"), factor) | number | string | "(", rel_expression, ")" | identifier, [ ".", (property_name | "type") ] | function_call ;
 
-function_call      = identifier, "(", [ arg_list ], ")" ;
-arg_list           = expression, { "," expression } ;
+function_call      = identifier, "(", [ arg_list ], ")", ";" ;
+arg_list           = rel_expression, { "," rel_expression } ;
+
+return             = "return", rel_expression, ";";
 
 identifier         = letter, { letter | digit | "_" } ;
-string             = "'" { letter | digit | special } "'" ;
+string             = ("\'" | "\"") { letter | digit | special } ("\'" | "\"") ;
 number             = digit, { digit }, [ ".", digit, { digit } ] ;
 letter             = "A" | "B" | ... | "Z" | "a" | "b" | ... | "z" ;
 digit              = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
@@ -70,13 +72,14 @@ rm webcam;
 
 - Defining a function for cart pricing:
 ```js
-function cart_price(prod)
+function cart_price(prod):
     return prod.price * prod.quantity;
+    end;
 ```
 
 - Defining a function for a combo promotion and calling it:
 ```js
-function peripherals_promotion()
+function peripherals_combo_promotion():
     out monitor 1;
     out keyboard 1;
     out mouse 1;

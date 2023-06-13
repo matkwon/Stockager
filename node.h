@@ -131,12 +131,18 @@ public:
 
 class NFunctionDeclaration : public NStatement {
 public:
-	const NIdentifier& type;
 	const NIdentifier& id;
 	VariableList arguments;
 	NBlock& block;
-	NFunctionDeclaration(const NIdentifier& type, const NIdentifier& id, 
-			const VariableList& arguments, NBlock& block) :
-		type(type), id(id), arguments(arguments), block(block) { }
+	NFunctionDeclaration(const NIdentifier& id, const VariableList& arguments, NBlock& block) :
+		id(id), arguments(arguments), block(block) { }
+	virtual llvm::Value* codeGen(CodeGenContext& context);
+};
+
+class NVarType : public NExpression {
+public:
+	const NIdentifier& id;
+	NVarType(const NIdentifier& id) :
+		id(id) { }
 	virtual llvm::Value* codeGen(CodeGenContext& context);
 };

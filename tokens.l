@@ -19,17 +19,20 @@
 "category"				        return TOKEN(TCATEGORY);
 "price"				            return TOKEN(TPRICE);
 "quantity"				        return TOKEN(TQUANTITY);
+"type"				            return TOKEN(TTYPE);
 "in"				            return TOKEN(TIN);
 "out"				            return TOKEN(TOUT);
 "rm"				            return TOKEN(TRM);
 "print"				            return TOKEN(TPRINT);
 "if"				            return TOKEN(TIF);
 "while"				            return TOKEN(TWHILE);
-"do"				            return TOKEN(TDO);
 "else"				            return TOKEN(TELSE);
 "end"				            return TOKEN(TEND);
 "function"				        return TOKEN(TFUNCTION);
 "return"				        return TOKEN(TRETURN);
+"or"				          	return TOKEN(TOR);
+"and"				          	return TOKEN(TAND);
+"not"				          	return TOKEN(TNOT);
 
 [a-zA-Z_][a-zA-Z0-9_]*          SAVE_TOKEN; return TIDENTIFIER;
 [0-9]+\.[0-9]* 			        SAVE_TOKEN; return TDOUBLE;
@@ -58,6 +61,7 @@
 "-"		          				return TOKEN(TMINUS);
 "*"		          				return TOKEN(TMUL);
 "/"				          		return TOKEN(TDIV);
+"!"				          	    return TOKEN(TNOT);
 
 .                               printf("Unknown token!\n"); yyterminate();
 

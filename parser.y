@@ -25,8 +25,8 @@
    they represent.
  */
 %token <string> TIDENTIFIER TINTEGER TDOUBLE TSTRING
-%token <token> TPRODUCT TNAME TDESCRIPTION TCATEGORY TPRICE TQUANTITY
-%token <token> TIN TOUT TRM TPRINT TIF TELSE TWHILE TDO TEND TSEMICOLON TCOLON TFUNCTION
+%token <token> TPRODUCT TNAME TDESCRIPTION TCATEGORY TPRICE TQUANTITY TTYPE
+%token <token> TIN TOUT TRM TPRINT TIF TELSE TWHILE TCOLON TEND TSEMICOLON TCOLON TFUNCTION
 %token <token> TCEQ TCNE TCLT TCLE TCGT TCGE TEQUAL
 %token <token> TLPAREN TRPAREN TLBRACE TRBRACE TCOMMA TDOT
 %token <token> TPLUS TMINUS TMUL TDIV
@@ -38,7 +38,7 @@
    calling an (NIdentifier*). It makes the compiler happy.
  */
 %type <string> string
-%type <expr> numeric ident expr stock_delta comparison term factor
+%type <expr> numeric ident expr stock_delta rel_expr term factor
 %type <varvec> func_decl_args
 %type <exprvec> call_args
 %type <block> program stmts block
@@ -69,7 +69,7 @@ stmt : product_def { $$ = new NProductDeclaration(*$2); }
 	 | while { $$ = new NLoopStatement(*$2); }
 	 | func_decl { $$ = new NFunctionDeclaration(*$2); }
 	 | function_call { $$ = new NFuncCallStatement(*$2); }
-	 | TRETURN expr { $$ = new NReturnStatement(*$2); }
+	 | TRETURN rel_expr { $$ = new NReturnStatement(*$2); }
      ;
 
 product_def : TPRODUCT ident TLBRACE 
@@ -88,37 +88,29 @@ stock_op : TIN ident stock_delta TSEMICOLON { $$ = new NStockIn(*$2, *$3); }
 		 | TOUT ident stock_delta TSEMICOLON { $$ = new NStockOut(*$2, *$3); }
 		 ;
 
-stock_delta : numeric | ident | expr
+stock_delta : numeric | ident | rel_expr
 			;
 
-var_assignment : ident TEQUAL expr TSEMICOLON { $$ = new NVariableAssignment(*$1, *$3); }
-			   | ident TDOT property_name TEQUAL expr TSEMICOLON { $$ = new NVariableAssignment(*$1, *$3, *$5); }
+var_assignment : ident TEQUAL rel_expr TSEMICOLON { $$ = new NVariableAssignment(*$1, *$3); }
+			   | ident TDOT property_name TEQUAL rel_expr TSEMICOLON { $$ = new NVariableAssignment(*$1, *$3, *$5); }
 			   ;
 
 property_name : TNAME | TDESCRIPTION | TCATEGORY | TPRICE | TQUANTITY
 			  ;
 
 print : TPRINT string TSEMICOLON { $$ = new NPrintStatement(*$2); }
-	  | TPRINT expr TSEMICOLON { $$ = new NPrintStatement(*$2); }
+	  | TPRINT rel_expr TSEMICOLON { $$ = new NPrintStatement(*$2); }
 	  ;
 	  
-if : TIF comparison TDO stmts TEND TSEMICOLON { $$ = new NIfStatement(*$2, *$4); }
-   | TIF comparison TDO stmts TELSE stmts TEND TSEMICOLON { $$ = new NIfStatement(*$2, *$4, *$6); }
+if : TIF rel_expr TCOLON stmts TEND TSEMICOLON { $$ = new NIfStatement(*$2, *$4); }
+   | TIF rel_expr TCOLON stmts TELSE TCOLON stmts TEND TSEMICOLON { $$ = new NIfStatement(*$2, *$4, *$7); }
    ;
 
-while : TWHILE comparison TDO stmts TEND TSEMICOLON { $$ = new NWhileStatement(*$2, *$4); }
+while : TWHILE rel_expr TCOLON stmts TEND TSEMICOLON { $$ = new NWhileStatement(*$2, *$4); }
 	  ;
 
-comparison : expr TCEQ expr { $$ = new NBinaryOperator(*$1, "==", *$3); }
-		   | expr TCNE expr { $$ = new NBinaryOperator(*$1, "!=", *$3); }
-		   | expr TCLT expr { $$ = new NBinaryOperator(*$1, "<", *$3); }
-		   | expr TCLE expr { $$ = new NBinaryOperator(*$1, "<=", *$3); }
-		   | expr TCGT expr { $$ = new NBinaryOperator(*$1, ">", *$3); }
-		   | expr TCGE expr { $$ = new NBinaryOperator(*$1, ">=", *$3); }
-		   ;
-
-func_decl : TFUNCTION ident TLPAREN func_decl_args TRPAREN stmts TEND TSEMICOLON 
-			{ $$ = new NFunctionDeclaration(*$1, *$2, *$4, *$6); delete $4; }
+func_decl : TFUNCTION ident TLPAREN func_decl_args TRPAREN TCOLON stmts TEND TSEMICOLON 
+			{ $$ = new NFunctionDeclaration(*$2, *$4, *$7); delete $4; }
 		  ;
 	
 func_decl_args : /*blank*/  { $$ = new VariableList(); }
@@ -126,22 +118,37 @@ func_decl_args : /*blank*/  { $$ = new VariableList(); }
 		  | func_decl_args TCOMMA var_assignment { $1->push_back($<var_assignment>3); }
 		  ;
 	
+rel_expr : expr
+		 | rel_expr TOR expr { $$ = new BinaryOperator(*$1, "||", *$3); }
+		 | rel_expr TAND expr { $$ = new BinaryOperator(*$1, "&&", *$3); }
+		 | rel_expr TCEQ expr { $$ = new BinaryOperator(*$1, "==", *$3); }
+		 | rel_expr TCNE expr { $$ = new BinaryOperator(*$1, "!=", *$3); }
+		 | rel_expr TCLT expr { $$ = new BinaryOperator(*$1, "<", *$3); }
+		 | rel_expr TCLE expr { $$ = new BinaryOperator(*$1, "<=", *$3); }
+		 | rel_expr TCGT expr { $$ = new BinaryOperator(*$1, ">", *$3); }
+		 | rel_expr TCGE expr { $$ = new BinaryOperator(*$1, ">=", *$3); }
+		 ;
+	
 expr : term
-	 | expr TPLUS term { $$ = new BinaryOperator(*$1, "+", *$3); }
-	 | expr TMINUS term { $$ = new BinaryOperator(*$1, "-", *$3); }
+	 | rel_expr TPLUS term { $$ = new BinaryOperator(*$1, "+", *$3); }
+	 | rel_expr TMINUS term { $$ = new BinaryOperator(*$1, "-", *$3); }
+	 | rel_expr TOR term { $$ = new BinaryOperator(*$1, "||", *$3); }
 	 ;
 	
 term : factor
 	 | term TMUL factor { $$ = new BinaryOperator(*$1, "*", *$3); }
 	 | term TDIV factor { $$ = new BinaryOperator(*$1, "/", *$3); }
+	 | term TAND factor { $$ = new BinaryOperator(*$1, "&&", *$3); }
 	 ;
 
 factor : TPLUS factor { $$ = new UnaryOperator("+", *$2); }
 	   | TMINUS factor { $$ = new UnaryOperator("-", *$2); }
+	   | TNOT factor { $$ = new UnaryOperator("!", *$2); }
 	   | numeric
-	   | TLPAREN expr TRPAREN {}
+	   | TLPAREN rel_expr TRPAREN {}
 	   | ident {}
 	   | ident TDOT property_name { $$ = new NProductAttribute(*$1, *$3); }
+	   | ident TDOT TTYPE { $$ = new NVarType(*$1); }
 	   | function_call {}
 	   ;
 
@@ -149,8 +156,8 @@ function_call : ident TLPAREN call_args TRPAREN { $$ = new NFunctionCall(*$1, *$
 			  ;
 	
 call_args : /*blank*/  { $$ = new ExpressionList(); }
-		  | expr { $$ = new ExpressionList(); $$->push_back($1); }
-		  | call_args TCOMMA expr  { $1->push_back($3); }
+		  | rel_expr { $$ = new ExpressionList(); $$->push_back($1); }
+		  | call_args TCOMMA rel_expr  { $1->push_back($3); }
 		  ;
 
 ident : TIDENTIFIER { $$ = new NIdentifier(*$1); delete $1; }
