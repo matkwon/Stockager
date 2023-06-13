@@ -91,5 +91,5 @@ peripherals_combo_promotion();
 ## Testing
 Test with:
 ```sh
-python main.py test.st
+python main.py test.stkg
 ```
