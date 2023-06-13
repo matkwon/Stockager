@@ -85,7 +85,7 @@ function peripherals_combo_promotion():
     out mouse 1;
     end;
 
-peripherals_combo_promotion()
+peripherals_combo_promotion();
 ```
 
 ## Testing
