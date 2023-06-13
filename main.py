@@ -286,53 +286,63 @@ class BinOp(Node):
                 return ("Int", 1)
             return ("Int", 0)
         elif self.value == ">":
+            if self.children[0].evaluate(st)[0] == "Product" or self.children[1].evaluate(st)[0] == "Product":
+                errfn(f"Cannot apply binary operator '{self.value}' to values '{self.children[0].evaluate(st)[1]}' and '{self.children[1].evaluate(st)[1]}'.")
             if self.children[0].evaluate(st)[1] > self.children[1].evaluate(st)[1]:
                 return ("Int", 1)
             return ("Int", 0)
         elif self.value == ">=":
+            if self.children[0].evaluate(st)[0] == "Product" or self.children[1].evaluate(st)[0] == "Product":
+                errfn(f"Cannot apply binary operator '{self.value}' to values '{self.children[0].evaluate(st)[1]}' and '{self.children[1].evaluate(st)[1]}'.")
             if self.children[0].evaluate(st)[1] >= self.children[1].evaluate(st)[1]:
                 return ("Int", 1)
             return ("Int", 0)
         elif self.value == "<":
+            if self.children[0].evaluate(st)[0] == "Product" or self.children[1].evaluate(st)[0] == "Product":
+                errfn(f"Cannot apply binary operator '{self.value}' to values '{self.children[0].evaluate(st)[1]}' and '{self.children[1].evaluate(st)[1]}'.")
             if self.children[0].evaluate(st)[1] < self.children[1].evaluate(st)[1]:
                 return ("Int", 1)
             return ("Int", 0)
         elif self.value == "<=":
+            if self.children[0].evaluate(st)[0] == "Product" or self.children[1].evaluate(st)[0] == "Product":
+                errfn(f"Cannot apply binary operator '{self.value}' to values '{self.children[0].evaluate(st)[1]}' and '{self.children[1].evaluate(st)[1]}'.")
             if self.children[0].evaluate(st)[1] <= self.children[1].evaluate(st)[1]:
                 return ("Int", 1)
             return ("Int", 0)
         elif self.value == "+":
-            if self.children[0].evaluate(st)[0] == "String" or self.children[1].evaluate(st)[0] == "String":
+            if self.children[0].evaluate(st)[0] == "Product" or self.children[1].evaluate(st)[0] == "Product":
+                errfn(f"Cannot apply binary operator '{self.value}' to values '{self.children[0].evaluate(st)[1]}' and '{self.children[1].evaluate(st)[1]}'.")
+            elif self.children[0].evaluate(st)[0] == "String" or self.children[1].evaluate(st)[0] == "String":
                 return ("String", str(self.children[0].evaluate(st)[1]) + str(self.children[1].evaluate(st)[1]))
             elif self.children[0].evaluate(st)[0] == "Float" or self.children[1].evaluate(st)[0] == "Float":
                 return ("Float", float(self.children[0].evaluate(st)[1]) + float(self.children[1].evaluate(st)[1]))
             return ("Int", self.children[0].evaluate(st)[1] + self.children[1].evaluate(st)[1])
         elif self.value == "-":
-            if self.children[0].evaluate(st)[0] == "String" or self.children[1].evaluate(st)[0] == "String":
+            if self.children[0].evaluate(st)[0] in ["String", "Product"] or self.children[1].evaluate(st)[0] in ["String", "Product"]:
                 errfn(f"Cannot apply binary operator '{self.value}' to values '{self.children[0].evaluate(st)[1]}' and '{self.children[1].evaluate(st)[1]}'.")
             elif self.children[0].evaluate(st)[0] == "Float" or self.children[1].evaluate(st)[0] == "Float":
                 return ("Float", float(self.children[0].evaluate(st)[1]) - float(self.children[1].evaluate(st)[1]))
             return ("Int", self.children[0].evaluate(st)[1] - self.children[1].evaluate(st)[1])
         elif self.value == "*":
-            if self.children[0].evaluate(st)[0] == "String" or self.children[1].evaluate(st)[0] == "String":
+            if self.children[0].evaluate(st)[0] in ["String", "Product"] or self.children[1].evaluate(st)[0] in ["String", "Product"]:
                 errfn(f"Cannot apply binary operator '{self.value}' to values '{self.children[0].evaluate(st)[1]}' and '{self.children[1].evaluate(st)[1]}'.")
             elif self.children[0].evaluate(st)[0] == "Float" or self.children[1].evaluate(st)[0] == "Float":
                 return ("Float", float(self.children[0].evaluate(st)[1]) * float(self.children[1].evaluate(st)[1]))
             return ("Int", self.children[0].evaluate(st)[1] * self.children[1].evaluate(st)[1])
         elif self.value == "/":
-            if self.children[0].evaluate(st)[0] == "String" or self.children[1].evaluate(st)[0] == "String":
+            if self.children[0].evaluate(st)[0] in ["String", "Product"] or self.children[1].evaluate(st)[0] in ["String", "Product"]:
                 errfn(f"Cannot apply binary operator '{self.value}' to values '{self.children[0].evaluate(st)[1]}' and '{self.children[1].evaluate(st)[1]}'.")
             elif self.children[0].evaluate(st)[0] == "Float" or self.children[1].evaluate(st)[0] == "Float":
                 return ("Float", float(self.children[0].evaluate(st)[1]) / float(self.children[1].evaluate(st)[1]))
             return ("Int", self.children[0].evaluate(st)[1] / self.children[1].evaluate(st)[1])
         elif self.value == "or":
-            if self.children[0].evaluate(st)[0] == "String" or self.children[1].evaluate(st)[0] == "String":
+            if self.children[0].evaluate(st)[0] in ["String", "Product"] or self.children[1].evaluate(st)[0] in ["String", "Product"]:
                 errfn(f"Cannot apply binary operator '{self.value}' to values '{self.children[0].evaluate(st)[1]}' and '{self.children[1].evaluate(st)[1]}'.")
             elif self.children[0].evaluate(st)[0] == "Float" or self.children[1].evaluate(st)[0] == "Float":
                 return ("Float", float(self.children[0].evaluate(st)[1]) or float(self.children[1].evaluate(st)[1]))
             return ("Int", self.children[0].evaluate(st)[1] or self.children[1].evaluate(st)[1])
         elif self.value == "and":
-            if self.children[0].evaluate(st)[0] == "String" or self.children[1].evaluate(st)[0] == "String":
+            if self.children[0].evaluate(st)[0] in ["String", "Product"] or self.children[1].evaluate(st)[0] in ["String", "Product"]:
                 errfn(f"Cannot apply binary operator '{self.value}' to values '{self.children[0].evaluate(st)[1]}' and '{self.children[1].evaluate(st)[1]}'.")
             elif self.children[0].evaluate(st)[0] == "Float" or self.children[1].evaluate(st)[0] == "Float":
                 return ("Float", float(self.children[0].evaluate(st)[1]) and float(self.children[1].evaluate(st)[1]))

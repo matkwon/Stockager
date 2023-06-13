@@ -13,7 +13,7 @@ product monitor {
     description: ''; 
     category: 'Accessories'; 
     price: 99.99; 
-    quantity: 30; 
+    quantity: 10; 
 }
 
 # defining "keyboard" product
@@ -45,6 +45,9 @@ print("mouse price = " + mouse.price);
 print("mouse quantity = " + mouse.quantity);
 print("");
 print("type of in flow: " + monthly_mouse_inflow.type);
+print("type of keyboard: " + keyboard.type);
+kb_pr = keyboard.price;
+print("type of keyboard price: " + kb_pr.type);
 print("");
 
 function peripherals_combo_promotion():
@@ -52,14 +55,25 @@ function peripherals_combo_promotion():
     out monitor 1;
     out keyboard 1;
     out mouse 1;
-    end;
+end;
 
-peripherals_combo_promotion();
+clients = 10;
+i = 0;
+while i < clients:
+    peripherals_combo_promotion();
+    i = i + 1;
+end;
 
-print("final mouse quantity = " + mouse.quantity);
-print("final monitor quantity = " + monitor.quantity);
-print("final keyboard quantity = " + keyboard.quantity);
+print("");
 
-rm mouse;
-rm monitor;
-rm keyboard;
+if mouse.quantity == 0: rm mouse; print("no more mouses!");
+else: print("still " + mouse.quantity + " mouses left");
+end;
+
+if monitor.quantity == 0: rm monitor; print("no more monitors!");
+else: print("still " + monitor.quantity + " monitors left");
+end;
+
+if keyboard.quantity == 0: rm keyboard; print("no more keyboards!");
+else: print("still " + keyboard.quantity + " keyboards left");
+end;
